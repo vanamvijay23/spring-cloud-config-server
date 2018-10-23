@@ -1,0 +1,136 @@
+v	
+	@Bean("consumer")
+	public ConsumerController getConsumerClass() {
+		
+		
+		return new ConsumerController();
+	}
+	
+	
+		ConsumerController cc=(ConsumerController) ac.getBean("consumer");
+	cc.getEmployeeDetails();
+	
+	
+	
+	
+	
+	@Controller
+
+public class ConsumerController {
+
+	
+	//discovering the client using @DisvoveryCliennt annoatation.
+	
+@Autowired
+DiscoveryClient disClient;
+	
+@ResponseBody
+@RequestMapping(name="/employeedetails")
+
+========
+
+@GetMapping(name="/employeedetails")
+	public   ResponseEntity<String> getEmployeeDetails() {
+		System.out.println("hi");
+		List<ServiceInstance> serviceinst_list=disClient.getInstances("spring_producer");
+		ServiceInstance iinf=serviceinst_list.get(0);
+
+		System.out.println(iinf.getUri().toString());
+		
+		String employee_path=iinf.getUri().toString();
+		
+	employee_path=employee_path+"/employees";
+	
+		RestTemplate restTemp=new RestTemplate();
+		ResponseEntity<String> rs=restTemp.exchange(employee_path, HttpMethod.GET, getHeaders(),String.class);
+		
+	
+		System.out.println(rs.getBody());
+		
+		// TODO Auto-generated method stub
+	
+	return rs;
+	}
+=============
+
+working ;
+
+@RestController
+public class ConsumerController {
+
+	
+	//discovering the client using @DisvoveryCliennt annoatation.
+	
+@Autowired
+DiscoveryClient disClient;
+	
+
+	@GetMapping(name="/employeedetails")
+	public   Employee getEmployeeDetails() {
+		System.out.println("hi");
+		List<ServiceInstance> serviceinst_list=disClient.getInstances("spring_producer");
+		ServiceInstance iinf=serviceinst_list.get(0);
+
+		System.out.println(iinf.getUri().toString());
+		
+		String employee_path=iinf.getUri().toString();
+		
+	employee_path=employee_path+"/employees";
+	
+		RestTemplate restTemp=new RestTemplate();
+		ResponseEntity<Employee> rs=restTemp.exchange(employee_path, HttpMethod.GET, getHeaders(),Employee.class);
+		
+	Employee empl_list= restTemp.getForObject(employee_path, Employee.class);
+	
+		System.out.println(rs.getBody());
+		
+		// TODO Auto-generated method stub
+	
+	return empl_list;
+	}
+=========
+
+using ribbon client'
+
+@RestController
+public class ConsumerController {
+
+	
+	//discovering the client using @DisvoveryCliennt annoatation.
+	
+@Autowired
+LoadBalancerClient lbc;
+
+/*	@Autowired
+DiscoveryClient disClient;*/
+	
+
+	@GetMapping(name="/employeedetails")
+	public   Employee getEmployeeDetails() {
+		System.out.println("hi");
+		
+		
+		ServiceInstance iinf=lbc.choose("spring_producer");
+		
+		
+	//	List<ServiceInstance> serviceinst_list=disClient.getInstances("spring_producer");
+		//ServiceInstance iinf=serviceinst_list.get(0);
+
+		System.out.println(iinf.getUri().toString());
+		
+		String employee_path=iinf.getUri().toString();
+		
+	employee_path=employee_path+"/employees";
+	
+		RestTemplate restTemp=new RestTemplate();
+		ResponseEntity<String> rs=restTemp.exchange(employee_path, HttpMethod.GET, getHeaders(),String.class);
+		
+	
+		Employee e =restTemp.getForObject(employee_path, Employee.class);
+		System.out.println(rs.getBody());
+		
+		// TODO Auto-generated method stub
+	
+	//return rs;
+		return e;
+	}
